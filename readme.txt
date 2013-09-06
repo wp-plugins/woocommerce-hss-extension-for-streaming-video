@@ -25,6 +25,7 @@ Features of the plugin include:
 
 More information at [HostStreamSell.com](http://hoststreamsell.com/).
 
+Demo at [wordpress.hoststreamsell.com](http://wordpress.hoststreamsell.com/).
 
 == Installation ==
 
