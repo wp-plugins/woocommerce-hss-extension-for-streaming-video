@@ -5,7 +5,7 @@ Contributors: hoststreamsell
 Tags: sell,video,streaming,cart
 Requires at least: 3.3
 Tested up to: 3.4
-Stable tag: 0.1
+Stable tag: 0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -22,6 +22,8 @@ whether you want to limit the amount of usage in terms of a bandwidth usage cap.
 Features of the plugin include:
 
 * Extend the flexibility of the WooCommerce plugin to sell access to videos hosted on the HostStreamSell platform
+* Currently only works with one selling price per video
+* Currently does not support selling of groups of videos together
 
 More information at [HostStreamSell.com](http://hoststreamsell.com/).
 
@@ -59,3 +61,7 @@ No this only works with the HostStreamSell video platform
 = 0.1 =
 
 * Initial version uploaded to WordPress. Currently only supports one price per video
+
+= 0.2 =
+
+* Removed some uneeded debug logging

@@ -419,27 +419,18 @@ add_filter( 'woocommerce_product_tabs', 'my_tab' );
 
 function woo_complete_purchase_add_video($order_status, $order_id) {
 
-	$fh = fopen('/home/.sites/_default/logs/encoding_log.txt', 'a');
-        fwrite($fh, "**** woo order ".$order_id."****\n");
 
 	// order object (optional but handy)
 	$order = new WC_Order( $order_id );
-        fwrite($fh, "**** woo order count ".count( $order->get_items() )."****\n");
 
 	if ( count( $order->get_items() ) > 0 ) {
-        fwrite($fh, "**** woo order 1****\n");
 		foreach( $order->get_items() as $item ) {
-        	fwrite($fh, "**** woo order 2****\n");
 
 			$product_obj = $order->get_product_from_item( $item );
 			$product = $product_obj->get_post_data();
-        		fwrite($fh, "**** woo order 3 ".$product->ID." ****\n");
 			if((get_post_meta($product->ID, 'is_streaming_video', true)) or (get_post_meta($product->ID, 'is_streaming_video_bundle', true))) {
-        			fwrite($fh, "**** woo order 4****\n");
                                 $options = get_option('hss_woo_options');
                                 $userId = $order->user_id;
-        			fwrite($fh, "**** woo order 5 ".$userId."****\n");
-        			fwrite($fh, "**** woo order 5 ".$ppv_option."****\n");
 
 				$ppv_option = null;
 				//if(empty($download['options']))
@@ -471,15 +462,12 @@ function woo_complete_purchase_add_video($order_status, $order_id) {
 
 		                if( is_wp_error( $response ) ) {
                 		        _log("error msg: ".$response->get_error_message()."\n");
-        				fwrite($fh, "**** error ".$response->get_error_message()."****\n");
 		                        #sleep(10);
 		                }else if( $response['response']['code'] != "200" ) {
                 		        _log("request code bad: ".$response['response']['code']."\n");
-        				fwrite($fh, "**** error ".$response['response']['code']."****\n");
 		                        #sleep(10);
 		                }else{
                 		        _log("request code good: ".$response['response']['code']."\n");
-        				fwrite($fh, "**** ".$response['response']['code']."****\n");
 		                        #$request_success = True;
                 		}
                    		$res = $response['body'];
