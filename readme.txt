@@ -5,7 +5,7 @@ Contributors: hoststreamsell
 Tags: sell,video,streaming,cart
 Requires at least: 3.3
 Tested up to: 3.4
-Stable tag: 0.2
+Stable tag: 0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,3 +65,7 @@ No this only works with the HostStreamSell video platform
 = 0.2 =
 
 * Removed some uneeded debug logging
+
+= 0.3 =
+
+* Add support for downloading files
