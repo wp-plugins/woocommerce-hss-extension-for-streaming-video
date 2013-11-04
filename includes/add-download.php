@@ -238,6 +238,10 @@ function hss_woo_before_download_content($download_id) {
         if($post->post_type == 'product' && is_singular() && is_main_query()) {
 
 			if(get_post_meta($post->ID, 'is_streaming_video', true)) {
+                                $guestcheckout = get_option( "woocommerce_enable_guest_checkout", "notfound" );
+                                if($guestcheckout == "yes")
+                                        $video .= "<BR><CENTER><B>WARNING - guest checkout is enabled. Please do not puchase without registering as you will not get access to the video</B></CENTER><BR>";
+
 				$options = get_option('hss_woo_options');
 				$userId = $user_ID;
         
@@ -246,10 +250,12 @@ function hss_woo_before_download_content($download_id) {
 		                   'method' => 'secure_videos.get_video_playback_details',
 		                   'api_key' => $options['api_key'],
 		                   'video_id' => $hss_video_id,
-		                   'private_user_id' => $userId
+		                   'private_user_id' => $userId,
+				   #'expands' => 'playback_details',
 		                );
 				_log($params);
 		                $response = wp_remote_post( "https://www.hoststreamsell.com/services/api/rest/xml/", array(
+		                #$response = wp_remote_post( "https://www.hoststreamsell.com/api/1/xml/videos", array(
 		                        'method' => 'POST',
 		                        'timeout' => 15,
 		                        'redirection' => 5,
@@ -274,7 +280,7 @@ function hss_woo_before_download_content($download_id) {
 		                $user_has_access = $xml->result->user_has_access;
 				//$video = "".$user_has_access;
 				if($user_has_access=="true")
-					$video = "<center>You have access to this video</center>";
+					$video .= "<center>You have access to this video</center>";
 				elseif(is_user_logged_in()){
 					_log("checking orders");
 					$args=array(
@@ -393,7 +399,8 @@ function hss_woo_before_download_content($download_id) {
                 	                        $video_height=$options['player_height_default'];
 				}
 
-		                $video = $video."
+
+		                $video .= "
 		                <script type=\"text/javascript\" src=\"https://www.hoststreamsell.com/mod/secure_videos/jwplayer-6/jwplayer.js\"></script>
 				<script type=\"text/javascript\" src=\"https://www.hoststreamsell.com/mod/secure_videos/jwplayer/swfobject.js\"></script>
 				<script type=\"text/javascript\">jwplayer.key=\"".$options['jwplayer_license']."\";</script>
