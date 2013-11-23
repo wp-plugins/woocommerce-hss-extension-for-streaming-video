@@ -278,6 +278,7 @@ function hss_woo_before_download_content($download_id) {
 		                $title = $xml->result->title;
 		                $hss_video_title = $title;
 		                $user_has_access = $xml->result->user_has_access;
+		                $user_can_download = $xml->result->user_can_download;
 				//$video = "".$user_has_access;
 				if($user_has_access=="true")
 					$video .= "<center>You have access to this video</center>";
@@ -477,7 +478,7 @@ function hss_woo_before_download_content($download_id) {
 			        </script>
 				</div>
 			        </center>";
-				if($user_has_access=="true"){
+				if($user_can_download=="true"){
 				        $video .= "<BR><div><input type='button' id='$hss_video_id' class='myajaxdownloadlinks' value='Get Download Links'></div>
 					<div id='download_links_$hss_video_id'></div>";
 				}
@@ -559,7 +560,8 @@ function woo_complete_purchase_add_video($order_status, $order_id) {
 			}
 		}
 	}
-	return $order_status;
+	#return $order_status;
+	return ‘completed’;
 }
 add_action( 'woocommerce_payment_complete_order_status', 'woo_complete_purchase_add_video', 10, 2 );
 
@@ -802,7 +804,7 @@ function update_videos()
 						}
 
 						update_post_meta($post_ID, '_visibility','visible');
-						update_post_meta($post_ID, '_downloadable','no');
+						update_post_meta($post_ID, '_downloadable','yes');
 						update_post_meta($post_ID, '_virtual','yes');
 						_log("PostID=".$post_ID);
 						if($option_index==1){
