@@ -5,7 +5,7 @@ Contributors: hoststreamsell
 Tags: sell,video,streaming,cart
 Requires at least: 3.3
 Tested up to: 3.4
-Stable tag: 0.5
+Stable tag: 0.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,3 +78,7 @@ No this only works with the HostStreamSell video platform
 
 *Betterlogic whether to show donload links depending on whether the current
 user has download access
+
+= 0.6 =
+
+*Only add Video tab to streaming video products
