@@ -372,8 +372,10 @@ function hss_woo_before_download_content($download_id) {
         	                        if($options['player_height_default']!="")
                 	                        $video_height=$options['player_height_default'];
 				}
-
-
+				$httpString = "http";
+				if (is_ssl()) {
+					$httpString = "https";
+				}
 		                $video .= "
 		                <script type=\"text/javascript\" src=\"https://www.hoststreamsell.com/mod/secure_videos/jwplayer-6/jwplayer.js\"></script>
 				<script type=\"text/javascript\" src=\"https://www.hoststreamsell.com/mod/secure_videos/jwplayer/swfobject.js\"></script>
@@ -412,7 +414,7 @@ function hss_woo_before_download_content($download_id) {
 					    playlist: [{
 					        image: '$hss_video_big_thumb_url',
 				        	sources: [{
-					            file: 'https://www.hoststreamsell.com/mod/secure_videos/private_media_playlist_v2.php?params=".$hss_video_id."!".urlencode($referrer)."!".$hss_video_user_token."!',
+					            file: '$httpString://www.hoststreamsell.com/mod/secure_videos/private_media_playlist_v2.php?params=".$hss_video_id."!".urlencode($referrer)."!".$hss_video_user_token."!',
 					            type: 'rtmp'
 					        },{
 				        	    file: 'http://".$hss_video_mediaserver_ip.":1935/hss/smil:".$hss_video_smil."/playlist.m3u8".$hss_video_smil_token."&referer=".urlencode($referrer)."'

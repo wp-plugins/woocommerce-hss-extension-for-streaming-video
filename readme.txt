@@ -5,7 +5,7 @@ Contributors: hoststreamsell
 Tags: sell,video,streaming,cart
 Requires at least: 3.3
 Tested up to: 3.4
-Stable tag: 0.6
+Stable tag: 0.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -82,3 +82,7 @@ user has download access
 = 0.6 =
 
 *Only add Video tab to streaming video products
+
+= 0.7 =
+
+*Fix jwplayer cross protocol issue between http/https
