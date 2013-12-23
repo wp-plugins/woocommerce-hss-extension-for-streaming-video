@@ -208,7 +208,13 @@ function hss_woo_options_page () {
                                         <td>
                                                 <input type="checkbox" name="hss_woo_options[disable_desc_updates]" value="1"<?php checked( 1 == $options['disable_desc_updates']); ?> />
                                         </td>
-                                </tr>				
+                                </tr>			
+                                <tr>
+                                        <th scope="row">Add video access when order is in processing state</th>
+                                        <td>
+                                                <input type="checkbox" name="hss_woo_options[add_video_on_processing]" value="1"<?php checked( 1 == $options['add_video_on_processing']); ?> />
+                                        </td>
+                                </tr>	
 				<tr>
 				        <th scope="row">Add/Update Videos</th>
 				        <td>
@@ -235,6 +241,7 @@ function hss_woo_before_download_content($download_id) {
 	global $is_iphone;
         global $user_ID;
 	$video = "";
+
         if($post->post_type == 'product' && is_singular() && is_main_query()) {
 
 			if(get_post_meta($post->ID, 'is_streaming_video', true)) {
@@ -454,8 +461,8 @@ function hss_woo_before_download_content($download_id) {
 				</div>
 			        </center>";
 				if($user_can_download=="true"){
-				        $video .= "<BR><div><input type='button' id='$hss_video_id' class='myajaxdownloadlinks' value='Get Download Links'></div>
-					<div id='download_links_$hss_video_id'></div>";
+				        $video .= "<div class='hss_download_button'><input type='button' id='$hss_video_id' class='myajaxdownloadlinks' value='Get Download Links'></div>
+					<div class='hss_download_links' id='download_links_$hss_video_id'></div>";
 				}
 
 			}
@@ -465,82 +472,160 @@ function hss_woo_before_download_content($download_id) {
 
 function my_tab( $tabs ) {
     global $post;
-    if(get_post_meta($post->ID, 'is_streaming_video', true))
+    if(get_post_meta($post->ID, 'is_streaming_video', true)){
 	    $my_tab = array( 'my_tab' =>  array( 'title' => 'Video', 'priority' => 9, 'callback' => 'hss_woo_before_download_content' ) );
-
     return array_merge( $my_tab, $tabs );
+    }
 }
 
 add_filter( 'woocommerce_product_tabs', 'my_tab' );
 
-function woo_complete_purchase_add_video($order_status, $order_id) {
+function woo_complete_purchase_add_video($order_id) {
 
 	_log("woo_complete_purchase_add_video");
 	// order object (optional but handy)
 	$order = new WC_Order( $order_id );
+	$options = get_option('hss_woo_options');
 
-	if ( count( $order->get_items() ) > 0 ) {
-		foreach( $order->get_items() as $item ) {
+	if(get_post_meta($order_id, '_hss_woo_processed',true))
+	{
+		_log("access already added, skipping...");
+	}else{
+		if ( count( $order->get_items() ) > 0 ) {
+			foreach( $order->get_items() as $item ) {
+				$product_obj = $order->get_product_from_item( $item );
+				$product = $product_obj->get_post_data();
+				if((get_post_meta($product->ID, 'is_streaming_video', true)) or (get_post_meta($product->ID, 'is_streaming_video_bundle', true))) {
+        	                        $userId = $order->user_id;
 
-			$product_obj = $order->get_product_from_item( $item );
-			$product = $product_obj->get_post_data();
-			if((get_post_meta($product->ID, 'is_streaming_video', true)) or (get_post_meta($product->ID, 'is_streaming_video_bundle', true))) {
-                                $options = get_option('hss_woo_options');
-                                $userId = $order->user_id;
+					$ppv_option = null;
+					//if(empty($download['options']))
+					$ppv_option = get_post_meta($product->ID, '_woo_ppv_id', true);
+					//else
+					//	$ppv_option = $download['options']['price_id'];
+					_log("ppv option = ".$ppv_option);
+				        $params = array(
+				           'method' => 'secure_videos.add_user_ppv',
+				           'api_key' => $options['api_key'],
+				           'ppv_id' => $ppv_option,
+				           'private_user_id' => $userId
+				        );
+	               			_log($params); 
+					$response = wp_remote_post( "https://www.hoststreamsell.com/services/api/rest/xml/", array(
+			                        'method' => 'POST',
+			                        'timeout' => 15,
+		                	        'redirection' => 5,
+			                        'httpversion' => '1.0',
+			                        'blocking' => true,
+			                        'headers' => array(),
+			                        'body' => $params,
+			                        'cookies' => array()
+	        		            )
+	        		        );
+	
+					$video_id = get_post_meta($product->ID, '_woo_video_id', true);
+					update_post_meta($item->ID, '_woo_video_id', $video_id);
 
-				$ppv_option = null;
-				//if(empty($download['options']))
-				$ppv_option = get_post_meta($product->ID, '_woo_ppv_id', true);
-				//else
-				//	$ppv_option = $download['options']['price_id'];
-				_log("ppv option = ".$ppv_option);
-			        $params = array(
-			           'method' => 'secure_videos.add_user_ppv',
-			           'api_key' => $options['api_key'],
-			           'ppv_id' => $ppv_option,
-			           'private_user_id' => $userId
-			        );
-               			_log($params); 
-				$response = wp_remote_post( "https://www.hoststreamsell.com/services/api/rest/xml/", array(
-		                        'method' => 'POST',
-		                        'timeout' => 15,
-	                	        'redirection' => 5,
-		                        'httpversion' => '1.0',
-		                        'blocking' => true,
-		                        'headers' => array(),
-		                        'body' => $params,
-		                        'cookies' => array()
-        		            )
-        		        );
+	                                if( is_wp_error( $response ) ) {
+        	                                _log("error msg: ".$response->get_error_message()."\n");
+	                                        $hss_errors = get_user_meta( $userId, "hss_errors", true );
+	                                        $hss_errors[] = $ppv_option;
+	                                        update_user_meta( $userId, "hss_errors", $hss_errors);
+	                                }else if( $response['response']['code'] != "200" ) {
+	                                        _log("request code bad: ".$response['response']['code']."\n");
+	                                        $hss_errors = get_user_meta( $userId, "hss_errors", true );
+	                                        $hss_errors[] = $ppv_option;
+	                                        update_user_meta( $userId, "hss_errors", $hss_errors);
+	                                }else{
+	                                        _log("request code good: ".$response['response']['code']."\n");
+	                                }
 
-				$video_id = get_post_meta($product->ID, '_woo_video_id', true);
-				update_post_meta($item->ID, '_woo_video_id', $video_id);
+		                	$res = $response['body'];
 
-                                if( is_wp_error( $response ) ) {
-                                        _log("error msg: ".$response->get_error_message()."\n");
-                                        $hss_errors = get_user_meta( $userId, "hss_errors", true );
-                                        $hss_errors[] = $ppv_option;
-                                        update_user_meta( $userId, "hss_errors", $hss_errors);
-                                }else if( $response['response']['code'] != "200" ) {
-                                        _log("request code bad: ".$response['response']['code']."\n");
-                                        $hss_errors = get_user_meta( $userId, "hss_errors", true );
-                                        $hss_errors[] = $ppv_option;
-                                        update_user_meta( $userId, "hss_errors", $hss_errors);
-                                }else{
-                                        _log("request code good: ".$response['response']['code']."\n");
-                                }
-
-	                	$res = $response['body'];
-
-			        $xml = new SimpleXMLElement($res);
-	                	_log($xml);
+				        $xml = new SimpleXMLElement($res);
+	        	        	_log($xml);
+				}
 			}
 		}
 	}
+	update_post_meta($order_id, '_hss_woo_processed',true);
 	#return $order_status;
-	return ‘completed’;
+	#return ‘completed’;
 }
-add_action( 'woocommerce_payment_complete_order_status', 'woo_complete_purchase_add_video', 10, 2 );
+#add_action( 'woocommerce_payment_complete_order_status', 'woo_complete_purchase_add_video', 10, 2 );
+add_action( 'woocommerce_order_status_completed', 'woo_complete_purchase_add_video');
+
+function woo_complete_purchase_add_video_processing($order_id) {
+
+        _log("woo_complete_purchase_add_video_processing");
+        // order object (optional but handy)
+        $order = new WC_Order( $order_id );
+        $options = get_option('hss_woo_options');
+
+	if($options['add_video_on_processing']==1){
+		if ( count( $order->get_items() ) > 0 ) {
+        	        foreach( $order->get_items() as $item ) {
+
+                	        $product_obj = $order->get_product_from_item( $item );
+	                        $product = $product_obj->get_post_data();
+	                        if((get_post_meta($product->ID, 'is_streaming_video', true)) or (get_post_meta($product->ID, 'is_streaming_video_bundle', true))) {
+	                                $userId = $order->user_id;
+
+	                                $ppv_option = null;
+	                                //if(empty($download['options']))
+	                                $ppv_option = get_post_meta($product->ID, '_woo_ppv_id', true);
+	                                //else
+	                                //      $ppv_option = $download['options']['price_id'];
+	                                _log("ppv option = ".$ppv_option);
+	                                $params = array(
+	                                   'method' => 'secure_videos.add_user_ppv',
+	                                   'api_key' => $options['api_key'],
+	                                   'ppv_id' => $ppv_option,
+	                                   'private_user_id' => $userId
+	                                );
+	                                _log($params);
+	                                $response = wp_remote_post( "https://www.hoststreamsell.com/services/api/rest/xml/", array(
+	                                        'method' => 'POST',
+	                                        'timeout' => 15,
+	                                        'redirection' => 5,
+	                                        'httpversion' => '1.0',
+	                                        'blocking' => true,
+	                                        'headers' => array(),
+	                                        'body' => $params,
+	                                        'cookies' => array()
+	                                    )
+	                                );
+	
+        	                        $video_id = get_post_meta($product->ID, '_woo_video_id', true);
+	                                update_post_meta($item->ID, '_woo_video_id', $video_id);
+                	                if( is_wp_error( $response ) ) {
+	                                        _log("error msg: ".$response->get_error_message()."\n");
+	                                        $hss_errors = get_user_meta( $userId, "hss_errors", true );
+	                                        $hss_errors[] = $ppv_option;
+	                                        update_user_meta( $userId, "hss_errors", $hss_errors);
+	                                }else if( $response['response']['code'] != "200" ) {
+	                                        _log("request code bad: ".$response['response']['code']."\n");
+	                                        $hss_errors = get_user_meta( $userId, "hss_errors", true );
+	                                        $hss_errors[] = $ppv_option;
+	                                        update_user_meta( $userId, "hss_errors", $hss_errors);
+	                                }else{
+	                                        _log("request code good: ".$response['response']['code']."\n");
+	                                }
+	
+        	                        $res = $response['body'];
+
+	                                $xml = new SimpleXMLElement($res);
+	                                _log($xml);
+				}
+                        }
+                }
+		update_post_meta($order_id, '_hss_woo_processed',true);
+        }
+        #return $order_status;
+        #return ‘completed’;
+}
+
+add_action( 'woocommerce_order_status_processing', 'woo_complete_purchase_add_video_processing');
 
 function update_videos()
 {
