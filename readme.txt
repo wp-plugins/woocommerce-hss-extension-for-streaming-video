@@ -5,7 +5,7 @@ Contributors: hoststreamsell
 Tags: sell,video,streaming,cart
 Requires at least: 3.3
 Tested up to: 3.4
-Stable tag: 0.8
+Stable tag: 0.81
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -27,7 +27,7 @@ Features of the plugin include:
 
 More information at [HostStreamSell.com](http://hoststreamsell.com/).
 
-Demo at [wordpress.hoststreamsell.com](http://wordpress.hoststreamsell.com/).
+Demo at [woo_demo.hoststreamsell.com](http://woo_demo.hoststreamsell.com/).
 
 == Installation ==
 
@@ -36,6 +36,8 @@ Demo at [wordpress.hoststreamsell.com](http://wordpress.hoststreamsell.com/).
 account
 3. Click the Update key to Pull video information from HostStreamSell platform
 and insert into the system automatically (also to update)
+4. Go to WooCommerce > Settings and make sure the check box for 'Enablee guest checkout' is not checked. If it is, uncheck and press Save Changes
+
 
 == Frequently Asked Questions ==
 
@@ -90,3 +92,7 @@ user has download access
 = 0.8 =
 
 *Improve functionality around adding video access when order is in processing state. Add default log file
+
+= 0.81 =
+
+*Updated the readme
