@@ -5,7 +5,7 @@ Contributors: hoststreamsell
 Tags: sell,video,streaming,cart
 Requires at least: 3.3
 Tested up to: 3.4
-Stable tag: 0.81
+Stable tag: 0.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -96,3 +96,7 @@ user has download access
 = 0.81 =
 
 *Updated the readme
+
+= 0.9 =
+
+* added support to set a Website Reference ID. The default for this will be 0 (zero), and should only be changed in the event that you want multiple WordPress websites selling the same videos. You set a different ID for each website, which is used to distinguish for example a customer with WordPress user ID of 5 on one website, with a totally different user on another website with the same user ID of 5
