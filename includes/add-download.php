@@ -32,6 +32,12 @@ function hss_init(){
                 $options['database_id'] = "0";
                 update_option('hss_woo_options', $options);
         }
+	if (array_key_exists('watching_video_text', $options)==false) {
+                $options['watching_video_text'] = "You have access to this video";
+                update_option('hss_woo_options', $options);
+        }
+
+
 }
 
 function hss_create_page( $slug, $option, $page_title = '', $page_content = '', $post_parent = 0 ) {
@@ -233,6 +239,18 @@ function hss_woo_options_page () {
                                         <td>
                                                 <input type="checkbox" name="hss_woo_options[add_video_on_processing]" value="1"<?php checked( 1 == $options['add_video_on_processing']); ?> />
                                         </td>
+                                </tr>
+                                <tr>
+                                        <th scope="row">Watching Trailer Text (leave blank for no message)</th>
+                                        <td>
+                                                <input type="text" size="50" name="hss_woo_options[watching_trailer_text]" value="<?php echo $options['watching_trailer_text']; ?>" />
+                                        </td>
+                                </tr>
+                                <tr>
+                                        <th scope="row">Watching Full Video Text (leave blank for no message)</th>
+                                        <td>
+                                                <input type="text" size="50" name="hss_woo_options[watching_video_text]" value="<?php echo $options['watching_video_text']; ?>" />
+                                        </td>
                                 </tr>	
 				<tr>
 				        <th scope="row">Add/Update Videos</th>
@@ -343,7 +361,9 @@ function hss_woo_before_download_content($download_id) {
 		                $user_can_download = $xml->result->user_can_download;
 				//$video = "".$user_has_access;
 				if($user_has_access=="true")
-					$video .= "<center>You have access to this video</center>";
+					$video .= '<div class="hss_watching_video_text">'.$options['watching_video_text'].'</div>';
+				else
+					$video .= '<div class="hss_watching_trailer_text">'.$options['watching_trailer_text'].'</div>';
 		                $description = $xml->result->description;
 		                $feature_duration = $xml->result->feature_duration;
 		                $trailer_duration = $xml->result->trailer_duration;
@@ -666,6 +686,8 @@ function update_videos()
         $group_res = "";
         if( is_wp_error( $group_response ) ) {
    	   _log("ERROR");
+	    $error_string = $group_response->get_error_message();
+	    _log($error_string);
         } else {
            $group_res = $group_response['body'];
         }

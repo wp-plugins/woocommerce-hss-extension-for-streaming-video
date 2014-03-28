@@ -5,7 +5,7 @@ Contributors: hoststreamsell
 Tags: sell,video,streaming,cart
 Requires at least: 3.3
 Tested up to: 3.4
-Stable tag: 0.91
+Stable tag: 0.92
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -44,6 +44,16 @@ and insert into the system automatically (also to update)
 = Does this work with other video platforms =
 
 No this only works with the HostStreamSell video platform
+
+= How do I style the text which appears above the video player to say whether it is the trailer or full video?
+
+Add the following to your theme's style.css to for example make the text centered
+
+.hss_watching_video_text { text-align:center; }
+.hss_watching_trailer_text { text-align:center; }
+
+You can set what the text says (or whether to show any text at all through the plugin's settings)
+
 
 == Screenshots ==
 
@@ -104,3 +114,7 @@ user has download access
 = 0.91 =
 
 *fix check-in issue
+
+= 0.92 =
+
+*Added ability to configure text above video when showing trailer or full video through a plugin setting
