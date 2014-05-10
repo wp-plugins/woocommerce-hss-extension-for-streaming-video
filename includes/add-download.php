@@ -417,6 +417,28 @@ function hss_woo_before_download_content($download_id) {
 				if (is_ssl()) {
 					$httpString = "https";
 				}
+
+		                $subtitle_count = $xml->result->subtitle_count;
+		                $subtitle_index = 1;
+				$subtitle_text = "";
+				if($subtitle_count>0){
+					$subtitle_text = ",
+						tracks: [{";
+			                while($subtitle_index <= $subtitle_count)
+			                {
+			                	$subtitle_label = (string)$xml->result[0]->subtitles->{'subtitle_label_'.$subtitle_index}[0];
+						$subtitle_file = (string)$xml->result[0]->subtitles->{'subtitle_file_'.$subtitle_index}[0];
+						$subtitle_text .= "
+					            file: \"https://www.hoststreamsell.com/mod/secure_videos/subtitles/$subtitle_file\",
+					            label: \"$subtitle_label\",
+					            kind: \"captions\",
+					            \"default\": true";
+						$subtitle_index += 1;
+					}
+					$subtitle_text .= "
+						}]";
+				}
+
 		                $video .= "
 		                <script type=\"text/javascript\" src=\"https://www.hoststreamsell.com/mod/secure_videos/jwplayer-6/jwplayer.js\"></script>
 				<script type=\"text/javascript\" src=\"https://www.hoststreamsell.com/mod/secure_videos/jwplayer/swfobject.js\"></script>
@@ -459,7 +481,7 @@ function hss_woo_before_download_content($download_id) {
 					            type: 'rtmp'
 					        },{
 				        	    file: 'http://".$hss_video_mediaserver_ip.":1935/hss/smil:".$hss_video_smil."/playlist.m3u8".$hss_video_smil_token."&referer=".urlencode($referrer)."'
-					        }]
+					        }]$subtitle_text
 					    }],
 					    height: $video_height,
 					    primary: 'flash',		

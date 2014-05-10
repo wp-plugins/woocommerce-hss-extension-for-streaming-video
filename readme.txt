@@ -4,8 +4,8 @@ Plugin URI: http://wordpres2.hoststreamsell.com
 Contributors: hoststreamsell
 Tags: sell,video,streaming,cart
 Requires at least: 3.3
-Tested up to: 3.4
-Stable tag: 0.92
+Tested up to: 3.9
+Stable tag: 0.93
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -118,3 +118,7 @@ user has download access
 = 0.92 =
 
 *Added ability to configure text above video when showing trailer or full video through a plugin setting
+
+= 0.93 =
+
+*Added some beta subtitle support functionality
