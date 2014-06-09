@@ -1,11 +1,11 @@
 === WooCommerce HSS Extension for Streaming Video ===
-Author URI: http://www.hoststreamsell.com
-Plugin URI: http://wordpres2.hoststreamsell.com
+Author URI: https://www.hoststreamsell.com
+Plugin URI: http://woo_demo.hoststreamsell.com
 Contributors: hoststreamsell
 Tags: sell,video,streaming,cart
 Requires at least: 3.3
-Tested up to: 3.9
-Stable tag: 0.93
+Tested up to: 3.91
+Stable tag: 0.94
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,7 +25,7 @@ Features of the plugin include:
 * Currently only works with one selling price per video
 * Currently does not support selling of groups of videos together
 
-More information at [HostStreamSell.com](http://hoststreamsell.com/).
+More information at [HostStreamSell.com](https://www.hoststreamsell.com/).
 
 Demo at [woo_demo.hoststreamsell.com](http://woo_demo.hoststreamsell.com/).
 
@@ -49,23 +49,10 @@ No this only works with the HostStreamSell video platform
 
 Add the following to your theme's style.css to for example make the text centered
 
-.hss_watching_video_text { text-align:center; }
-.hss_watching_trailer_text { text-align:center; }
+.hss_woo_watching_video_text { text-align:center; }
+.hss_woo_watching_trailer_text { text-align:center; }
 
 You can set what the text says (or whether to show any text at all through the plugin's settings)
-
-
-== Screenshots ==
-
-1. Download products overview
-2. Download configuration
-3. Download configuration details
-4. Download configuration with variable prices
-5. Payment history
-6. Discount codes
-7. Earnings and sales reports
-8. Add to cart / purchase button
-9. Checkout screen
 
 
 == Changelog ==
@@ -122,3 +109,7 @@ user has download access
 = 0.93 =
 
 *Added some beta subtitle support functionality
+
+= 0.94 =
+
+*Added subtitle updates and css styling for the trailer/full video text above the video
