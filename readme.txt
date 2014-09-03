@@ -5,7 +5,7 @@ Contributors: hoststreamsell
 Tags: sell,video,streaming,cart
 Requires at least: 3.3
 Tested up to: 3.91
-Stable tag: 0.95
+Stable tag: 1.00
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -113,3 +113,7 @@ user has download access
 = 0.94 =
 
 *Added subtitle updates and css styling for the trailer/full video text above the video
+
+= 1.00 =
+
+Updates to support responsive JW Player, and add ability to change the subtitle font size

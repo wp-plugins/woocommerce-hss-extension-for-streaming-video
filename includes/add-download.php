@@ -233,9 +233,27 @@ function hss_woo_options_page () {
                                         </td>
                                 </tr>
                                 <tr>
+                                        <th scope="row">Make Player Width and Height Responsive</th>
+                                        <td>
+                                                <input type="checkbox" name="hss_woo_options[responsive_player]" value="1"<?php checked( 1 == $options['responsive_player']); ?> />
+                                        </td>
+                                </tr>
+                                <tr>
+                                        <th scope="row">Reponsive Player Max Width<BR><i>(default is 640 if left blank, only used when Reponsive Player checkbox is checked)</i></th>
+                                        <td>
+                                                Width <input type="text" size="10" name="hss_woo_options[player_responsive_max_width]" value="<?php echo $options['player_responsive_max_width']; ?>" />
+                                        </td>
+                                </tr>
+                                <tr>
                                         <th scope="row">JW Player License Key<BR><i>(available from www.longtailvideo.com)</i></th>
                                         <td>
                                                 <input type="text" size="50" name="hss_woo_options[jwplayer_license]" value="<?php echo $options['jwplayer_license']; ?>" />
+                                        </td>
+                                </tr>
+                                <tr>
+                                        <th scope="row">Subtitle Font Size<BR><i>(leave blank for default size)</i></th>
+                                        <td>
+                                                <input type="text" size="5" name="hss_woo_options[subtitle_font_size]" value="<?php echo $options['subtitle_font_size']; ?>" />
                                         </td>
                                 </tr>
                                 <tr>
@@ -379,6 +397,7 @@ function hss_woo_before_download_content($download_id) {
 		                $trailer_duration = $xml->result->trailer_duration;
                 		$video_width = $xml->result->width;
 		                $video_height = $xml->result->height;
+				$aspect_ratio = $xml->result->aspect_ratio;
 		                if($video_width>640){
 					$video_width = "640";
 					$video_height = "370";
@@ -453,22 +472,31 @@ function hss_woo_before_download_content($download_id) {
 					}
 					$subtitle_text .= "
 						}]";
-					$captions = "
-						captions: {
-						        color: '#FFFFFF',
-						        fontSize: 24,
-						        backgroundOpacity: 0
-						},";
+                                        $fontSize = "";
+                                        if($options["subtitle_font_size"]!=""){
+                                                $fontSize = "
+                                                        fontSize: ".$options["subtitle_font_size"].",";
+                                        }
+                                        $captions = "
+                                                captions: {
+                                                        color: '#FFFFFF',".$fontSize."
+                                                        backgroundOpacity: 0
+                                                },";
+
 				}
 
 		                $video .= "
 		                <script type=\"text/javascript\" src=\"https://www.hoststreamsell.com/mod/secure_videos/jwplayer-6/jwplayer.js\"></script>
-				<script type=\"text/javascript\" src=\"https://www.hoststreamsell.com/mod/secure_videos/jwplayer/swfobject.js\"></script>
-				<script type=\"text/javascript\">jwplayer.key=\"".$options['jwplayer_license']."\";</script>
-		                <center>
-                		<div>
-		                <div id='videoframe'>If you are seing this you may not have Flash installed!</div>
-
+				<script type=\"text/javascript\">jwplayer.key=\"".$options['jwplayer_license']."\";</script>";
+                                if($options["responsive_player"]==1){
+                                        $responsive_width="640";
+                                        if($options["player_responsive_max_width"]!="")
+                                                $responsive_width=$options["player_responsive_max_width"];
+                                        $video.="<div class='hss_video_player' style='max-width:".$responsive_width."px;'>";
+                                }else{
+                                        $video.="<div class='hss_video_player'>";
+                                }
+                                $video.="<div id='videoframe'>An error occurred setting up the video player</div>
                 		<SCRIPT type=\"text/javascript\">
 
 		                var viewTrailer = false;
@@ -505,10 +533,16 @@ function hss_woo_before_download_content($download_id) {
 				        	    file: 'http://".$hss_video_mediaserver_ip.":1935/hss/smil:".$hss_video_smil."/playlist.m3u8".$hss_video_smil_token."&referer=".urlencode($referrer)."'
 					        }]$subtitle_text
 					    }],$captions
-					    height: $video_height,
-					    primary: 'flash',		
-					    width: $video_width
-					});
+                                            primary: 'flash',   ";
+                                if($options["responsive_player"]==1){
+                                        $video.="                  width: '100%',
+                                            aspectratio: '".$aspect_ratio."'";
+                                }else{
+                                        $video.="                 height: $video_height,
+                                          width: $video_width";
+                                }
+
+        $video.="			});
 		                }
 
 				function rtspPlayer()
@@ -536,8 +570,7 @@ function hss_woo_before_download_content($download_id) {
                                 }
 
 			        </script>
-				</div>
-			        </center>";
+				</div>";
 				if($user_can_download=="true"){
 				        $video .= "<div class='hss_download_button'><input type='button' id='$hss_video_id' class='myajaxdownloadlinks' value='Get Download Links'></div>
 					<div class='hss_download_links' id='download_links_$hss_video_id'></div>";
@@ -573,6 +606,25 @@ function woo_complete_purchase_add_video($order_id) {
 			foreach( $order->get_items() as $item ) {
 				$product_obj = $order->get_product_from_item( $item );
 				$product = $product_obj->get_post_data();
+
+				/*if((get_post_meta($product->ID, '_force_sell_synced_ids', true))){
+					_log("_force_sell_synced_ids");
+					$forced_sells = get_post_meta($product->ID, '_force_sell_synced_ids', true);
+					foreach( $forced_sells as $forced_sell ) {
+						_log("_force_sell_synced_id = ".$forced_sell);
+						hss_add_video_access(get_post($forced_sell),$order);
+					}
+				}
+                                if((get_post_meta($product->ID, '_force_sell_ids', true))){
+                                        _log("_force_sell_ids");
+                                        $forced_sells = get_post_meta($product->ID, '_force_sell_ids', true);
+                                        foreach( $forced_sells as $forced_sell ) {
+                                                _log("_force_sell_id = ".$forced_sell);
+                                                hss_add_video_access(get_post($forced_sell),$order);
+                                        }
+                                }*/
+
+				_log("product id = ".$product->ID);
 				if((get_post_meta($product->ID, 'is_streaming_video', true)) or (get_post_meta($product->ID, 'is_streaming_video_bundle', true))) {
         	                        $userId = $order->user_id;
 
@@ -633,6 +685,61 @@ function woo_complete_purchase_add_video($order_id) {
 }
 #add_action( 'woocommerce_payment_complete_order_status', 'woo_complete_purchase_add_video', 10, 2 );
 add_action( 'woocommerce_order_status_completed', 'woo_complete_purchase_add_video');
+
+function hss_add_video_access($product,$order){
+	$options = get_option('hss_woo_options');
+                                        $userId = $order->user_id;
+
+                                        $ppv_option = null;
+                                        //if(empty($download['options']))
+                                        $ppv_option = get_post_meta($product->ID, '_woo_ppv_id', true);
+                                        //else
+                                        //      $ppv_option = $download['options']['price_id'];
+                                        _log("ppv option = ".$ppv_option);
+                                        $params = array(
+                                           'method' => 'secure_videos.add_user_ppv',
+                                           'api_key' => $options['api_key'],
+                                           'ppv_id' => $ppv_option,
+                                           'private_user_id' => $userId,
+                                           'database_id' => $options['database_id']
+                                        );
+                                        _log($params);
+                                        $response = wp_remote_post( "https://www.hoststreamsell.com/services/api/rest/xml/", array(
+                                                'method' => 'POST',
+                                                'timeout' => 15,
+                                                'redirection' => 5,
+                                                'httpversion' => '1.0',
+                                                'blocking' => true,
+                                                'headers' => array(),
+                                                'body' => $params,
+                                                'cookies' => array()
+                                            )
+                                        );
+
+                                        $video_id = get_post_meta($product->ID, '_woo_video_id', true);
+                                        update_post_meta($item->ID, '_woo_video_id', $video_id);
+
+                                        if( is_wp_error( $response ) ) {
+                                                _log("error msg: ".$response->get_error_message()."\n");
+                                                $hss_errors = get_user_meta( $userId, "hss_errors", true );
+                                                $hss_errors[] = $ppv_option;
+                                                update_user_meta( $userId, "hss_errors", $hss_errors);
+                                        }else if( $response['response']['code'] != "200" ) {
+                                                _log("request code bad: ".$response['response']['code']."\n");
+                                                $hss_errors = get_user_meta( $userId, "hss_errors", true );
+                                                $hss_errors[] = $ppv_option;
+                                                update_user_meta( $userId, "hss_errors", $hss_errors);
+                                        }else{
+                                                _log("request code good: ".$response['response']['code']."\n");
+                                        }
+
+                                        $res = $response['body'];
+
+                                        $xml = new SimpleXMLElement($res);
+                                        _log($xml);
+
+}
+
 
 function woo_complete_purchase_add_video_processing($order_id) {
 
