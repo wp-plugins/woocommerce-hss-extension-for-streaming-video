@@ -177,12 +177,12 @@ jQuery(document).ready(function($) {
 
 
 // Register style sheet.
-add_action( 'wp_enqueue_scripts', 'register_plugin_styles' );
+add_action( 'wp_enqueue_scripts', 'register_hss_woo_plugin_styles' );
 
 /**
  * Register style sheet.
  */
-function register_plugin_styles() {
+function register_hss_woo_plugin_styles() {
         wp_register_style( 'woocommerce-hss-extension-for-streaming-video', plugins_url( 'woocommerce-hss-extension-for-streaming-video/css/hss-woo.css' ) );
         wp_enqueue_style( 'woocommerce-hss-extension-for-streaming-video' );
 }
@@ -235,7 +235,7 @@ function hss_woo_options_page () {
                                 <tr>
                                         <th scope="row">Make Player Width and Height Responsive</th>
                                         <td>
-                                                <input type="checkbox" name="hss_woo_options[responsive_player]" value="1"<?php checked( 1 == $options['responsive_player']); ?> />
+                                                <input type="checkbox" name="hss_woo_options[responsive_player]" value="1"<?php checked( $options['responsive_player'], 1); ?> />
                                         </td>
                                 </tr>
                                 <tr>
@@ -259,13 +259,13 @@ function hss_woo_options_page () {
                                 <tr>
                                         <th scope="row">Disable updating video descriptions</th>
                                         <td>
-                                                <input type="checkbox" name="hss_woo_options[disable_desc_updates]" value="1"<?php checked( 1 == $options['disable_desc_updates']); ?> />
+                                                <input type="checkbox" name="hss_woo_options[disable_desc_updates]" value="1"<?php checked( $options['disable_desc_updates'], 1); ?> />
                                         </td>
                                 </tr>			
                                 <tr>
                                         <th scope="row">Add video access when order is in processing state</th>
                                         <td>
-                                                <input type="checkbox" name="hss_woo_options[add_video_on_processing]" value="1"<?php checked( 1 == $options['add_video_on_processing']); ?> />
+                                                <input type="checkbox" name="hss_woo_options[add_video_on_processing]" value="1"<?php checked( $options['add_video_on_processing'], 1); ?> />
                                         </td>
                                 </tr>
                                 <tr>

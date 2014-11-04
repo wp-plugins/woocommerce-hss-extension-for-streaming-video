@@ -4,8 +4,8 @@ Plugin URI: http://woo_demo.hoststreamsell.com
 Contributors: hoststreamsell
 Tags: sell,video,streaming,cart
 Requires at least: 3.3
-Tested up to: 3.91
-Stable tag: 1.00
+Tested up to: 4.0
+Stable tag: 1.01
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,7 +25,8 @@ Features of the plugin include:
 * Currently only works with one selling price per video
 * Currently does not support selling of groups of videos together
 
-More information at [HostStreamSell.com](https://www.hoststreamsell.com/).
+More information at
+[HostStreamSell.com](https://www.hoststreamsell.com/?utm_source=wordpress&utm_medium=link&utm_campaign=woo_plugin).
 
 Demo at [woo_demo.hoststreamsell.com](http://woo_demo.hoststreamsell.com/).
 
@@ -117,3 +118,7 @@ user has download access
 = 1.00 =
 
 Updates to support responsive JW Player, and add ability to change the subtitle font size
+
+= 1.01 =
+
+Minor update to admin screen checked function
