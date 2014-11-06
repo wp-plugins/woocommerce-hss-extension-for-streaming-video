@@ -23,21 +23,21 @@ function hss_init(){
  	//hss_create_page( esc_sql( _x( 'my-videos', 'page_slug', 'woocommerce' ) ), 'woocommerce_my_videos_page_id', __( 'My Videos', 'woocommerce' ), '[woocommerce_my_videos]', hss_get_page_id( 'myaccount' ) );
 
         $options = get_option('hss_woo_options');
-        if (array_key_exists('database_id', $options)) {
-                if($options['database_id'] == ""){
-                        $options['database_id'] = "0";
-                        update_option('hss_woo_options', $options);
-                }
-        }else{
-                $options['database_id'] = "0";
-                update_option('hss_woo_options', $options);
-        }
-	if (array_key_exists('watching_video_text', $options)==false) {
-                $options['watching_video_text'] = "You have access to this video";
-                update_option('hss_woo_options', $options);
-        }
-
-
+        if(is_array($options)){
+	        if (array_key_exists('database_id', $options)) {
+	                if($options['database_id'] == ""){
+	                        $options['database_id'] = "0";
+	                        update_option('hss_woo_options', $options);
+	                }
+	        }else{
+	                $options['database_id'] = "0";
+	                update_option('hss_woo_options', $options);
+	        }
+		if (array_key_exists('watching_video_text', $options)==false) {
+	                $options['watching_video_text'] = "You have access to this video";
+	                update_option('hss_woo_options', $options);
+	        }
+	}
 }
 
 function hss_create_page( $slug, $option, $page_title = '', $page_content = '', $post_parent = 0 ) {
@@ -78,10 +78,12 @@ function hss_get_page_id( $page ) {
 
 function hss_validate_options($input) {
          // strip html from textboxes
-        $input['api_key'] =  wp_filter_nohtml_kses($input['api_key']); // Sanitize textarea input (strip html tags, and escape characters)
+	$input['api_key'] =  trim(wp_filter_nohtml_kses($input['api_key']));
 
         if (!is_numeric($input['database_id'])) {
                 $input['database_id'] = "0";
+        }else{
+                $input['database_id'] =  trim(wp_filter_nohtml_kses($input['database_id']));
         }
         return $input;
 }
