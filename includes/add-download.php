@@ -969,7 +969,7 @@ function update_videos()
     							if ( is_wp_error( $tmp ) ) {
 								_log($tmp);
         							@unlink( $file_array[ 'tmp_name' ] );
-        							return $tmp;
+        							#return $tmp;
     							}
 
     							$thumb_id = media_handle_sideload( $file_array, 0 );
@@ -977,11 +977,11 @@ function update_videos()
     							if ( is_wp_error( $thumb_id ) ) {
 								_log($thumb_id);
         							@unlink( $file_array['tmp_name'] );
-							        return $thumb_id;
+							        #return $thumb_id;
     							}
 
     							$attachment_url = wp_get_attachment_url( $thumb_id );
-							_log("Attachment URL (".$thumb_id."): ".$attachment_url);
+							#_log("Attachment URL (".$thumb_id."): ".$attachment_url);
     							// Do whatever you have to here
 							set_post_thumbnail( $post_ID, $thumb_id );
 
