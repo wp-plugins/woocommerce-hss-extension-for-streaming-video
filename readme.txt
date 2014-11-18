@@ -5,7 +5,7 @@ Contributors: hoststreamsell
 Tags: sell,video,streaming,cart
 Requires at least: 3.3
 Tested up to: 4.0
-Stable tag: 1.03
+Stable tag: 1.04
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -130,3 +130,7 @@ Made improvements to enable videos still be created if upload directory is not p
 = 1.03 =
 
 Remove spaces from API key and database ID settings when updated
+
+= 1.04 =
+
+Added action for outputing content under the video if user has purchased

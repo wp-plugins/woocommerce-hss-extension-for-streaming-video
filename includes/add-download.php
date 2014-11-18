@@ -372,7 +372,7 @@ function hss_woo_before_download_content($download_id) {
                                         'httpversion' => '1.0',
                                         'blocking' => true,
                                         'headers' => array(),
-                                        'body' => $params,
+                                        //'body' => $params,
                                         'cookies' => array()
                                     )
                                 );
@@ -580,7 +580,12 @@ function hss_woo_before_download_content($download_id) {
 
 			}
         }
-	echo $video;
+        if($user_has_access=="true"){
+                echo $video;
+                do_action( 'hss_woo_show_video_purchased_extra_content', $post->ID);
+        }else{
+                echo $video;
+        }
 }
 
 function my_tab( $tabs ) {
