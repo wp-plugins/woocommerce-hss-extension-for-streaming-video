@@ -1,4 +1,4 @@
-<?
+<?php
 
 register_activation_hook(__FILE__, 'hss_add_defaults');
 register_uninstall_hook(__FILE__, 'hss_delete_plugin_options');
@@ -294,7 +294,7 @@ function hss_woo_options_page () {
                         </p>
                 </form>
         </div>
-<?
+<?php
 }
 
 function hss_menu () {

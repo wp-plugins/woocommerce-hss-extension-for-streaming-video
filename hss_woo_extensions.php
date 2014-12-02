@@ -6,7 +6,7 @@ Description: Sell Streaming Video Through WordPress (extends functionality in Wo
 Author: Gavin Byrne
 Author URI: http://hoststreamsell.com
 Contributors: 
-Version: 1.04
+Version: 1.05
 
 WooCommerce HSS Extension for Streaming Video is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
