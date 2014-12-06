@@ -5,7 +5,7 @@ Contributors: hoststreamsell
 Tags: sell,video,streaming,cart
 Requires at least: 3.3
 Tested up to: 4.0
-Stable tag: 1.05
+Stable tag: 1.06
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -117,24 +117,28 @@ user has download access
 
 = 1.00 =
 
-Updates to support responsive JW Player, and add ability to change the subtitle font size
+*Updates to support responsive JW Player, and add ability to change the subtitle font size
 
 = 1.01 =
 
-Minor update to admin screen checked function
+*Minor update to admin screen checked function
 
 = 1.02 =
 
-Made improvements to enable videos still be created if upload directory is not present or not writeable
+*Made improvements to enable videos still be created if upload directory is not present or not writeable
 
 = 1.03 =
 
-Remove spaces from API key and database ID settings when updated
+*Remove spaces from API key and database ID settings when updated
 
 = 1.04 =
 
-Added action for outputing content under the video if user has purchased
+*Added action for outputing content under the video if user has purchased
 
 = 1.05 =
 
-Fixed PHP open tag issue
+*Fixed PHP open tag issue
+
+= 1.06 =
+
+*Added functionality to create a URL on purchase which will allow access the purchased videos directly without having to log in

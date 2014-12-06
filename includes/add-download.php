@@ -23,6 +23,12 @@ function hss_init(){
  	//hss_create_page( esc_sql( _x( 'my-videos', 'page_slug', 'woocommerce' ) ), 'woocommerce_my_videos_page_id', __( 'My Videos', 'woocommerce' ), '[woocommerce_my_videos]', hss_get_page_id( 'myaccount' ) );
 
         $options = get_option('hss_woo_options');
+        $options['responsive_player'] = 0;
+        $options['disable_desc_updates'] = 0;
+        $options['add_video_on_processing'] = 0;
+        $options['add_video_on_processing'] = 0;
+        $options['use_non_loggedin_video_links'] = 0;
+
         if(is_array($options)){
 	        if (array_key_exists('database_id', $options)) {
 	                if($options['database_id'] == ""){
@@ -79,6 +85,17 @@ function hss_get_page_id( $page ) {
 function hss_validate_options($input) {
          // strip html from textboxes
 	$input['api_key'] =  trim(wp_filter_nohtml_kses($input['api_key']));
+
+	if(!isset( $input['responsive_player'] ) )
+		$input['responsive_player'] = 0;
+        if(!isset( $input['disable_desc_updates'] ) )
+                $input['disable_desc_updates'] = 0;
+        if(!isset( $input['add_video_on_processing'] ) )
+                $input['add_video_on_processing'] = 0;
+        if(!isset( $input['add_video_on_processing'] ) )
+                $input['add_video_on_processing'] = 0;
+        if(!isset( $input['use_non_loggedin_video_links'] ) )
+                $input['use_non_loggedin_video_links'] = 0;
 
         if (!is_numeric($input['database_id'])) {
                 $input['database_id'] = "0";
@@ -281,6 +298,12 @@ function hss_woo_options_page () {
                                         <td>
                                                 <input type="text" size="50" name="hss_woo_options[watching_video_text]" value="<?php echo $options['watching_video_text']; ?>" />
                                         </td>
+                                </tr>
+                                <tr>
+                                        <th scope="row">Enable video sharing links for access to purchased videos by URL</th>
+                                        <td>
+                                                <input type="checkbox" name="hss_woo_options[use_non_loggedin_video_links]" value="1"<?php checked( $options['use_non_loggedin_video_links'], 1); ?> />
+                                        </td>
                                 </tr>	
 				<tr>
 				        <th scope="row">Add/Update Videos</th>
@@ -319,7 +342,22 @@ function hss_woo_before_download_content($download_id) {
 				$options = get_option('hss_woo_options');
 				$userId = $user_ID;
        
-
+				if(isset($_GET['videolink'])){
+					global $wpdb;
+					$videolink = $_GET['videolink'];
+					$sql = "
+					SELECT order_id FROM {$wpdb->prefix}woocommerce_order_itemmeta oim 
+					LEFT JOIN {$wpdb->prefix}woocommerce_order_items oi 
+					ON oim.order_item_id = oi.order_item_id 
+					WHERE meta_key = '_hss_woo_link' AND meta_value = '%s'
+					GROUP BY order_id;
+					";
+					$order_id = $wpdb->get_col( $wpdb->prepare( $sql, $videolink ) );
+					if ($order_id){
+						$order = new WC_Order( $order_id[0] );
+						$userId = $order->user_id;
+					}
+				}
 
                                 if($userId!=0){
                                         $hss_errors = get_user_meta( $userId, "hss_errors", true );
@@ -610,7 +648,7 @@ function woo_complete_purchase_add_video($order_id) {
 		_log("access already added, skipping...");
 	}else{
 		if ( count( $order->get_items() ) > 0 ) {
-			foreach( $order->get_items() as $item ) {
+			foreach( $order->get_items() as $item_id => $item ) {
 				$product_obj = $order->get_product_from_item( $item );
 				$product = $product_obj->get_post_data();
 
@@ -660,9 +698,15 @@ function woo_complete_purchase_add_video($order_id) {
 			                        'cookies' => array()
 	        		            )
 	        		        );
+
 	
-					$video_id = get_post_meta($product->ID, '_woo_video_id', true);
-					update_post_meta($item->ID, '_woo_video_id', $video_id);
+					//$video_id = get_post_meta($product->ID, '_woo_video_id', true);
+					//update_post_meta($item->ID, '_woo_video_id', $video_id);
+
+					if($options['use_non_loggedin_video_links']==1){
+						$randString = md5(uniqid(rand(), true));
+						wc_add_order_item_meta($item_id,'_hss_woo_link',$randString);
+					}
 
 	                                if( is_wp_error( $response ) ) {
         	                                _log("error msg: ".$response->get_error_message()."\n");
@@ -723,8 +767,11 @@ function hss_add_video_access($product,$order){
                                             )
                                         );
 
-                                        $video_id = get_post_meta($product->ID, '_woo_video_id', true);
-                                        update_post_meta($item->ID, '_woo_video_id', $video_id);
+                                        //$video_id = get_post_meta($product->ID, '_woo_video_id', true);
+                                        //update_post_meta($item->order_item_id, '_woo_video_id', $video_id);
+
+                                        $randString = md5(uniqid(rand(), true));
+                                        wc_add_order_item_meta($item->order_item_id,'_hss_woo_link',$randString);
 
                                         if( is_wp_error( $response ) ) {
                                                 _log("error msg: ".$response->get_error_message()."\n");
@@ -757,7 +804,7 @@ function woo_complete_purchase_add_video_processing($order_id) {
 
 	if($options['add_video_on_processing']==1){
 		if ( count( $order->get_items() ) > 0 ) {
-        	        foreach( $order->get_items() as $item ) {
+        	        foreach( $order->get_items() as $item_id => $item ) {
 
                 	        $product_obj = $order->get_product_from_item( $item );
 	                        $product = $product_obj->get_post_data();
@@ -790,7 +837,13 @@ function woo_complete_purchase_add_video_processing($order_id) {
 	                                );
 	
         	                        $video_id = get_post_meta($product->ID, '_woo_video_id', true);
-	                                update_post_meta($item->ID, '_woo_video_id', $video_id);
+	                                //update_post_meta($item->ID, '_woo_video_id', $video_id);
+
+					if($options['use_non_loggedin_video_links']==1){
+						$randString = md5(uniqid(rand(), true));
+	                                        wc_add_order_item_meta($item_id,'_hss_woo_link',$randString);
+					}
+
                 	                if( is_wp_error( $response ) ) {
 	                                        _log("error msg: ".$response->get_error_message()."\n");
 	                                        $hss_errors = get_user_meta( $userId, "hss_errors", true );
