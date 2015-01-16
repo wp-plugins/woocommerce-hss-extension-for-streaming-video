@@ -676,6 +676,13 @@ function woo_complete_purchase_add_video($order_id) {
 					$ppv_option = null;
 					//if(empty($download['options']))
 					$ppv_option = get_post_meta($product->ID, '_woo_ppv_id', true);
+
+                                        if ( ! empty( $item['variation_id'] ) && 'product_variation' === get_post_type( $item['variation_id'] ) ) {
+                                              $var_product = get_post( $item['variation_id'] );
+                                                _log("variation id = ".$var_product->ID);
+                                              $ppv_option = get_post_meta($var_product->ID, '_woo_ppv_id', true);
+                                        }
+
 					//else
 					//	$ppv_option = $download['options']['price_id'];
 					_log("ppv option = ".$ppv_option);
@@ -813,9 +820,17 @@ function woo_complete_purchase_add_video_processing($order_id) {
 
 	                                $ppv_option = null;
 	                                //if(empty($download['options']))
+	                                _log("product id = ".$product->ID);
 	                                $ppv_option = get_post_meta($product->ID, '_woo_ppv_id', true);
 	                                //else
 	                                //      $ppv_option = $download['options']['price_id'];
+
+	                                if ( ! empty( $item['variation_id'] ) && 'product_variation' === get_post_type( $item['variation_id'] ) ) {
+	                                      $var_product = get_post( $item['variation_id'] );
+	                                	_log("variation id = ".$var_product->ID);
+          	                              $ppv_option = get_post_meta($var_product->ID, '_woo_ppv_id', true);
+                	                }
+
 	                                _log("ppv option = ".$ppv_option);
 	                                $params = array(
 	                                   'method' => 'secure_videos.add_user_ppv',
@@ -983,8 +998,10 @@ function update_videos()
 						$my_query = null;
 						$my_query = new WP_Query($args);
 						$post_ID = -1;
+						$video_existed = false;
 						if( $my_query->have_posts() ) {
 							_log("Video already a post");
+							$video_existed = true;
 							$video_post = $my_query->next_post();
 							_log("video_post ID=".$video_post->ID);
 							if($options['disable_desc_updates']==1){
@@ -1094,8 +1111,8 @@ function update_videos()
 					                        $time_limit = (string)$xml->result[0]->{'video'.$index}[0]->{'option'.$option_index}[0]->time_limit;
 					                        $rate_limit = (string)$xml->result[0]->{'video'.$index}[0]->{'option'.$option_index}[0]->rate_limit;
 						                $download_limit = (string)$xml->result[0]->{'video'.$index}[0]->{'option'.$option_index}[0]->download_limit;
-								$option_name = $time_limit.' streaming access';
-								if($bandwidth_cap!="Unlimited")
+								$option_name = $time_limit.' access';
+								/*if($bandwidth_cap!="Unlimited")
 									$option_name = $option_name.' '.$bandwidth_cap.' Data Cap';
 								if($rate_limit!="No limit")
                                                                         $option_name = $option_name.' rate limited to '.$rate_limit.' kbps';
@@ -1105,7 +1122,7 @@ function update_videos()
                                                                         $option_name = $option_name.' (includes download access)';
 								else
 									$option_name = $option_name.' (download accesss '.$download_limit.')';
-
+								*/
 								$prices[$option_id] = array('name' => $option_name,'amount' => $option_price);
 								_log("option id=".$option_id);
 								_log($prices[$option_id]["name"]);
@@ -1120,19 +1137,94 @@ function update_videos()
 						if($option_index==1){
 							//add no selling options
 							_log("1");
+                                                        $variations = get_posts( array(
+                                                                'post_parent'    => $post_ID,
+                                                                'post_type'    => 'product_variation',
+                                                        ));
+
+                                                        if( $variations ) {
+                                                                foreach($variations as $variation_post)
+                                                                        wp_delete_post( $variation_post->ID);
+                                                        }
+							delete_post_meta($post_ID, '_product_attributes');
 							delete_post_meta($post_ID, '_regular_price');
 							delete_post_meta($post_ID, '_price');
 							delete_post_meta($post_ID, '_woo_ppv_id');
+							wp_set_object_terms ($post_ID, 'standard', 'product_type');
 						}elseif($option_index==2){
 							_log("2 setting _woo_ppv_id to ".$option_id);
+                                                        $variations = get_posts( array(
+                                                                'post_parent'    => $post_ID,
+                                                                'post_type'    => 'product_variation',
+                                                        ));
+
+                                                        if( $variations ) {
+                                                                foreach($variations as $variation_post)
+                                                                        wp_delete_post( $variation_post->ID);
+                                                        }
+							delete_post_meta($post_ID, '_product_attributes');
 							update_post_meta($post_ID, '_regular_price',$option_price);
 							update_post_meta($post_ID, '_price',$option_price);
 							update_post_meta($post_ID, '_woo_ppv_id',$option_id);
+							wp_set_object_terms ($post_ID, 'standard', 'product_type');
 						}else{
-							_log("3 setting _woo_ppv_id to ".$option_id);
-							update_post_meta($post_ID, '_regular_price',$option_price);
-							update_post_meta($post_ID, '_price',$option_price);
-							update_post_meta($post_ID, '_woo_ppv_id',$option_id);
+							_log("3 post id=".$post_ID." setting _woo_ppv_id to ".$option_id);
+							update_post_meta( $post_ID, '_regular_price', '' );
+							update_post_meta( $post_ID, '_sale_price', '' );
+							update_post_meta( $post_ID, '_sale_price_dates_from', '' );
+							update_post_meta( $post_ID, '_sale_price_dates_to', '' );
+							update_post_meta( $post_ID, '_price', '' );
+							delete_post_meta( $post_ID, '_woo_ppv_id');
+
+							//Sets the attributes up to be used as variations but doesnt actually set them up as variations
+							wp_set_object_terms ($post_ID, 'variable', 'product_type');
+
+							$attribute_options = "";
+							foreach($prices as $option_id => $option_values)
+							{
+								$attribute_options.=$option_values['name']."|";
+							}
+	
+							$thedata = array(
+							   'access-period'=> array(
+						                'name'=>'Access Period',
+						                'value'=>$attribute_options,
+						                'is_visible' => '1',
+						                'is_variation' => '1',
+						                'is_taxonomy' => '0'
+					                   )
+							);
+							update_post_meta( $post_ID,'_product_attributes',$thedata);
+
+                                                        $variations = get_posts( array(
+                                                                'post_parent'    => $post_ID,
+                                                                'post_type'    => 'product_variation',
+                                                        ));
+
+							if( $variations ) {
+								foreach($variations as $variation_post)
+									wp_delete_post( $variation_post->ID);
+							}
+
+							foreach($prices as $option_id => $option_values)
+                                                        {
+								$new_variation = array(
+									'post_title'   => 'Variation # '.$option_id.' of Access Period',
+									'post_name'   => 'product-'.$post_ID.'-'.$option_id.'-variation',
+									'post_status'  => 'publish',
+									'post_parent'  => $post_ID,
+									'post_type'    => 'product_variation',
+								);
+								$variation_id = wp_insert_post( $new_variation );
+								do_action( 'woocommerce_create_product_variation', $variation_id );
+
+								update_post_meta( $variation_id, '_virtual', 'yes' );
+								update_post_meta( $variation_id, '_regular_price', $option_values['amount'] );
+								update_post_meta( $variation_id, '_price', $option_values['amount'] );
+								update_post_meta( $variation_id, 'attribute_access-period', sanitize_title_with_dashes($option_values['name']) );
+								update_post_meta( $variation_id, '_woo_ppv_id',$option_id);				
+								update_post_meta( $variation_id, 'is_streaming_video',true);
+							}		
 						}
 						update_post_meta($post_ID, 'is_streaming_video',true);
 							

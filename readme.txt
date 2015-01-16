@@ -5,7 +5,7 @@ Contributors: hoststreamsell
 Tags: sell,video,streaming,cart
 Requires at least: 3.3
 Tested up to: 4.0
-Stable tag: 1.06
+Stable tag: 1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -142,3 +142,7 @@ user has download access
 = 1.06 =
 
 *Added functionality to create a URL on purchase which will allow access the purchased videos directly without having to log in
+
+= 1.1 =
+
+*Added support for variable pricing options
