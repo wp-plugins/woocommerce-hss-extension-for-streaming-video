@@ -1063,7 +1063,6 @@ function update_videos()
 							set_post_thumbnail( $post_ID, $thumb_id );
 
 						}
-						$category_found = false;
 						$terms = array();
 						if(!in_array($video_id,$seen_videos))
 						        array_push($seen_videos,$video_id);
@@ -1231,6 +1230,213 @@ function update_videos()
 						$index+=1;
 					}
                                 }
+                                $prices = array();
+                                $option_index = 1;
+                                $purchase_option_count = (int)$xml->result->group_option_count;
+                                $option_name = "";
+                                if($purchase_option_count > 0)
+                                {
+                                        $args=array(
+                                                'meta_key'=>'_hss_woo_group_id',
+                                                'meta_value'=> $group_id,
+                                                'post_type' => 'product',
+                                        );
+                                        _log($args);
+                                        $my_query = null;
+                                        $my_query = new WP_Query($args);
+                                        $post_ID = -1;
+                                        if( $my_query->have_posts() ) {
+                                                _log("Video group already a post");
+                                                $video_group_post = $my_query->next_post();
+                                                _log("video_group_post ID=".$video_group_post->ID);
+                                                if($options['disable_desc_updates']==1){
+                                                        $my_post = array(
+                                                           'ID' => $video_group_post->ID,
+                                                           'post_title' => $group_title,
+                                                        );
+                                                }else{
+                                                        $my_post = array(
+                                                           'ID' => $video_group_post->ID,
+                                                           'post_title' => $group_title,
+                                                           'post_content' => $group_description,
+                                                        );
+                                                }
+                                                // Update the post into the database
+                                                $post_ID = wp_update_post( $my_post );
+                                                _log("RESULT FROM UPDATE: ".$post_ID);
+                                        }else{
+                                                // Create post object
+                                                _log("Create video group post");
+                                                $my_post = array(
+                                                   'post_title' => $group_title,
+                                                   'post_content' => $group_description,
+                                                   'post_status' => 'publish',
+                                                   'post_author' => 1,
+                                                   'post_type' => 'product',
+
+                                                );
+
+                                                // Insert the post into the database
+                                                $post_ID = wp_insert_post( $my_post );
+                                                $url = $group_thumbnail;
+                                                $tmp = download_url( $url );
+                                                $file_array = array(
+                                                   'name' => basename( $url ),
+                                                   'tmp_name' => $tmp
+                                                );
+                                                // Check for download errors
+                                                if ( is_wp_error( $tmp ) ) {
+                                                        _log($tmp);
+                                                        @unlink( $file_array[ 'tmp_name' ] );
+                                                        return $tmp;
+                                                }
+
+                                                $thumb_id = media_handle_sideload( $file_array, 0 );
+                                                // Check for handle sideload errors.
+                                                if ( is_wp_error( $thumb_id ) ) {
+                                                        _log($thumb_id);
+                                                        @unlink( $file_array['tmp_name'] );
+                                                        return $thumb_id;
+                                                }
+
+                                                $attachment_url = wp_get_attachment_url( $thumb_id );
+                                                _log("Attachment URL (".$thumb_id."): ".$attachment_url);
+                                                // Do whatever you have to here
+                                                set_post_thumbnail( $post_ID, $thumb_id );
+
+                                        }
+
+                                        update_post_meta($post_ID, '_hss_woo_group_id', $group_id);
+
+					$vid_cats = array();
+                                        array_push($vid_cats,$group_title);
+                                        _log($vid_cats);
+                                        wp_set_object_terms($post_ID,$vid_cats,'product_cat');
+                                                
+                                        $purchase_option_details = array();
+                                        while($option_index <= $purchase_option_count)
+                                        {
+                                                $option_id = (int)$xml->result[0]->{'group_option'.$option_index}[0]->option_id;
+                                                $option_type = (string)$xml->result[0]->{'group_option'.$option_index}[0]->type;
+                                                $option_price = (string)$xml->result[0]->{'group_option'.$option_index}[0]->price;
+                                                if( ( ( (float)$option_price) < $lowest_price) or ($lowest_price==0))
+                                                       $lowest_price = (float)$option_price;
+                                                $bandwidth_cap = (string)$xml->result[0]->{'group_option'.$option_index}[0]->bandwidth_cap;
+                                                $time_limit = (string)$xml->result[0]->{'group_option'.$option_index}[0]->time_limit;
+                                                $rate_limit = (string)$xml->result[0]->{'group_option'.$option_index}[0]->rate_limit;
+                                                //$download_limit = (string)$group_xml->result[0]->{'group_option'.$option_index}[0]->download_limit;
+                                                $option_name = $time_limit.' access';
+                                                /*if($bandwidth_cap!="Unlimited")
+                                                        $option_name = $option_name.' '.$bandwidth_cap.' Data Cap';
+                                                if($rate_limit!="No limit")
+                                                         $option_name = $option_name.' rate limited to '.$rate_limit.' kbps';
+                                                if($download_limit=="No Downloads")
+                                                         $option_name = $option_name.' (no download access)';
+                                                elseif($download_limit=="Any Bitrate Available")
+                                                         $option_name = $option_name.' (includes download access)';
+                                                else
+                                                         $option_name = $option_name.' (download accesss '.$download_limit.')';*/
+                                                $prices[$option_id] = array('name' => $option_name,'amount' => $option_price);
+                                                _log("group option id=".$option_id);
+                                                _log($prices[$option_id]["name"]);
+                                                $option_index+=1;
+                                        }
+
+                                        _log("PostID=".$post_ID);
+                                        if($option_index==1){
+                                                       _log("1");
+                                                        $variations = get_posts( array(
+                                                                'post_parent'    => $post_ID,
+                                                                'post_type'    => 'product_variation',
+                                                        ));
+
+                                                        if( $variations ) {
+                                                                foreach($variations as $variation_post)
+                                                                        wp_delete_post( $variation_post->ID);
+                                                        }
+                                                        delete_post_meta($post_ID, '_product_attributes');
+                                                        delete_post_meta($post_ID, '_regular_price');
+                                                        delete_post_meta($post_ID, '_price');
+                                                        delete_post_meta($post_ID, '_woo_ppv_id');
+                                                        wp_set_object_terms ($post_ID, 'standard', 'product_type');
+                                                }elseif($option_index==2){
+                                                        _log("2 setting _woo_ppv_id to ".$option_id);
+                                                        $variations = get_posts( array(
+                                                                'post_parent'    => $post_ID,
+                                                                'post_type'    => 'product_variation',
+                                                        ));
+
+                                                        if( $variations ) {
+                                                                foreach($variations as $variation_post)
+                                                                        wp_delete_post( $variation_post->ID);
+                                                        }
+                                                        delete_post_meta($post_ID, '_product_attributes');
+                                                        update_post_meta($post_ID, '_regular_price',$option_price);
+                                                        update_post_meta($post_ID, '_price',$option_price);
+                                                        update_post_meta($post_ID, '_woo_ppv_id',$option_id);
+                                                        wp_set_object_terms ($post_ID, 'standard', 'product_type');
+                                                }else{
+                                                        _log("3 post id=".$post_ID." setting _woo_ppv_id to ".$option_id);
+                                                        update_post_meta( $post_ID, '_regular_price', '' );
+                                                        update_post_meta( $post_ID, '_sale_price', '' );
+                                                        update_post_meta( $post_ID, '_sale_price_dates_from', '' );
+                                                        update_post_meta( $post_ID, '_sale_price_dates_to', '' );
+                                                        update_post_meta( $post_ID, '_price', '' );
+                                                        delete_post_meta( $post_ID, '_woo_ppv_id');
+
+                                                        //Sets the attributes up to be used as variations but doesnt actually set them up as variations
+                                                        wp_set_object_terms ($post_ID, 'variable', 'product_type');
+
+                                                        $attribute_options = "";
+                                                        foreach($prices as $option_id => $option_values)
+                                                        {
+                                                                $attribute_options.=$option_values['name']."|";
+                                                        }
+
+                                                        $thedata = array(
+                                                           'access-period'=> array(
+                                                                'name'=>'Access Period',
+                                                                'value'=>$attribute_options,
+                                                                'is_visible' => '1',
+                                                                'is_variation' => '1',
+                                                                'is_taxonomy' => '0'
+                                                           )
+                                                        );
+                                                        update_post_meta( $post_ID,'_product_attributes',$thedata);
+
+                                                        $variations = get_posts( array(
+                                                                'post_parent'    => $post_ID,
+                                                                'post_type'    => 'product_variation',
+                                                        ));
+
+                                                        if( $variations ) {
+                                                                foreach($variations as $variation_post)
+                                                                        wp_delete_post( $variation_post->ID);
+                                                        }
+
+                                                        foreach($prices as $option_id => $option_values)
+                                                        {
+                                                                $new_variation = array(
+                                                                        'post_title'   => 'Variation # '.$option_id.' of Access Period',
+                                                                        'post_name'   => 'product-'.$post_ID.'-'.$option_id.'-variation',
+                                                                        'post_status'  => 'publish',
+                                                                        'post_parent'  => $post_ID,
+                                                                        'post_type'    => 'product_variation',
+                                                                );
+                                                                $variation_id = wp_insert_post( $new_variation );
+                                                                do_action( 'woocommerce_create_product_variation', $variation_id );
+
+                                                                update_post_meta( $variation_id, '_virtual', 'yes' );
+                                                                update_post_meta( $variation_id, '_regular_price', $option_values['amount'] );
+                                                                update_post_meta( $variation_id, '_price', $option_values['amount'] );
+                                                                update_post_meta( $variation_id, 'attribute_access-period', sanitize_title_with_dashes($option_values['name']) );
+                                                                update_post_meta( $variation_id, '_woo_ppv_id',$option_id);
+                                                                update_post_meta( $variation_id, 'is_streaming_video',true);
+                                                        }
+                                        update_post_meta($post_ID, 'is_streaming_video_bundle',true);
+                                        update_post_meta($post_ID, '_hss_woo_bundled_products', $group_video_post_ids);
+					}
+				}
 			}
                         $group_index+=1;
                 }
