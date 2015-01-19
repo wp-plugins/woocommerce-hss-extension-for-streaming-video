@@ -9,35 +9,35 @@ Stable tag: 1.11
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-
-Sell access to streaming videos through WordPress by integrating the HostStreamSell video platform with the great WooCommerce plugin
+The easiest and most advanced solution to selling videos with WordPress and WooCommerce
 
 == Description ==
 
-Sell access to streaming videos with total control over how long you want to
-give access for, whether you want to allow downloads or be stream only, and
-whether you want to limit the amount of usage in terms of a bandwidth usage cap.
+Get up and running in 3 easy steps!
 
+* Sign up for a free trial account on
+[HostStreamSell.com](https://www.hoststreamsell.com/?utm_source=wordpress&utm_medium=link&utm_campaign=woo_plugin)
+* Upload, encode, and organize your videos
+* Install WooCommerce and our WooCommerce integration plugin on your website and create all video products on your website with one click
 
-Features of the plugin include:
+Everything you could need!
 
-* Extend the flexibility of the WooCommerce plugin to sell access to videos hosted on the HostStreamSell platform
-* Currently only works with one selling price per video
-* Currently does not support selling of groups of videos together
-
-More information at
-[HostStreamSell.com](https://www.hoststreamsell.com/?utm_source=wordpress&utm_medium=link&utm_campaign=woo_plugin).
+* Rent or sell
+* Stream only or streaming and download.
+* Sell individual videos as well as groups of videos
+* Provide multiple purchase options for the one video or video group
 
 Demo at [woo_demo.hoststreamsell.com](http://woo_demo.hoststreamsell.com/).
 
 == Installation ==
 
-1. Activate the plugin
-2. Go to Settings > HSS Admin and enter API key from your HostStreamSell
-account
-3. Click the Update key to Pull video information from HostStreamSell platform
-and insert into the system automatically (also to update)
-4. Go to WooCommerce > Settings and make sure the check box for 'Enablee guest checkout' is not checked. If it is, uncheck and press Save Changes
+1. Sign up for a free trial account on
+[HostStreamSell.com](https://www.hoststreamsell.com/?utm_source=wordpress&utm_medium=link&utm_campaign=woo_plugin)
+2. Upload, encode, and organize your videos
+3. Install WooCommerce and this plugin
+ - Go to Settings > HSS WOO Admin and enter API key from your HostStreamSell account and press Save
+ - Click the Update key to Pull video information from HostStreamSell platform and insert video all products into the system automatically
+ - Go to WooCommerce > Settings and make sure the check box for 'Enablee guest checkout' is not checked. If it is, uncheck and press Save Changes
 
 
 == Frequently Asked Questions ==
