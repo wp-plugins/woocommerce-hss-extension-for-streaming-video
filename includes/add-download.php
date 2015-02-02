@@ -836,7 +836,8 @@ function woo_complete_purchase_add_video_processing($order_id) {
 	                                   'method' => 'secure_videos.add_user_ppv',
 	                                   'api_key' => $options['api_key'],
 	                                   'ppv_id' => $ppv_option,
-	                                   'private_user_id' => $userId
+	                                   'private_user_id' => $userId,
+					   'database_id' => $options['database_id']
 	                                );
 	                                _log($params);
 	                                $response = wp_remote_post( "https://www.hoststreamsell.com/services/api/rest/xml/", array(
@@ -1036,6 +1037,7 @@ function update_videos()
 							$post_ID = wp_insert_post( $my_post );
 
 							$url = $thumbnail; 
+							if($url!=""){
 							$tmp = download_url( $url );
     							$file_array = array(
     							    'name' => basename( $url ),
@@ -1061,6 +1063,7 @@ function update_videos()
 							#_log("Attachment URL (".$thumb_id."): ".$attachment_url);
     							// Do whatever you have to here
 							set_post_thumbnail( $post_ID, $thumb_id );
+							}
 
 						}
 						$terms = array();
@@ -1279,6 +1282,7 @@ function update_videos()
                                                 // Insert the post into the database
                                                 $post_ID = wp_insert_post( $my_post );
                                                 $url = $group_thumbnail;
+						if($url!=""){
                                                 $tmp = download_url( $url );
                                                 $file_array = array(
                                                    'name' => basename( $url ),
@@ -1303,7 +1307,7 @@ function update_videos()
                                                 _log("Attachment URL (".$thumb_id."): ".$attachment_url);
                                                 // Do whatever you have to here
                                                 set_post_thumbnail( $post_ID, $thumb_id );
-
+						}
                                         }
 
                                         update_post_meta($post_ID, '_hss_woo_group_id', $group_id);
