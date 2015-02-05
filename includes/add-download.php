@@ -1347,7 +1347,7 @@ function update_videos()
                                         }
 
                                         _log("PostID=".$post_ID);
-                                        if($option_index==1){
+                                        	if($option_index==1){
                                                        _log("1");
                                                         $variations = get_posts( array(
                                                                 'post_parent'    => $post_ID,
@@ -1437,9 +1437,9 @@ function update_videos()
                                                                 update_post_meta( $variation_id, '_woo_ppv_id',$option_id);
                                                                 update_post_meta( $variation_id, 'is_streaming_video',true);
                                                         }
+						}
                                         update_post_meta($post_ID, 'is_streaming_video_bundle',true);
                                         update_post_meta($post_ID, '_hss_woo_bundled_products', $group_video_post_ids);
-					}
 				}
 			}
                         $group_index+=1;
