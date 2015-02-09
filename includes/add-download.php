@@ -276,7 +276,7 @@ function hss_woo_options_page () {
                                         </td>
                                 </tr>
                                 <tr>
-                                        <th scope="row">Disable updating video descriptions</th>
+                                        <th scope="row">Disable updating video title and descriptions</th>
                                         <td>
                                                 <input type="checkbox" name="hss_woo_options[disable_desc_updates]" value="1"<?php checked( $options['disable_desc_updates'], 1); ?> />
                                         </td>
@@ -1008,7 +1008,7 @@ function update_videos()
 							if($options['disable_desc_updates']==1){
 								$my_post = array(
 								     'ID' => $video_post->ID,
-								     'post_title' => $title,
+								     'post_title' => $video_post->post_title,
 								);
 							}else{
                                                                 $my_post = array(
@@ -1255,7 +1255,7 @@ function update_videos()
                                                 if($options['disable_desc_updates']==1){
                                                         $my_post = array(
                                                            'ID' => $video_group_post->ID,
-                                                           'post_title' => $group_title,
+                                                           'post_title' => $video_group_post->post_title,
                                                         );
                                                 }else{
                                                         $my_post = array(
@@ -1345,6 +1345,10 @@ function update_videos()
                                                 _log($prices[$option_id]["name"]);
                                                 $option_index+=1;
                                         }
+
+                                        update_post_meta($post_ID, '_visibility','visible');
+                                        update_post_meta($post_ID, '_downloadable','yes');
+                                        update_post_meta($post_ID, '_virtual','yes');
 
                                         _log("PostID=".$post_ID);
                                         	if($option_index==1){

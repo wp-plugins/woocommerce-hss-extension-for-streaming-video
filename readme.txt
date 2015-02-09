@@ -5,7 +5,7 @@ Contributors: hoststreamsell
 Tags: sell,video,streaming,cart
 Requires at least: 3.3
 Tested up to: 4.0
-Stable tag: 1.13
+Stable tag: 1.14
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -158,3 +158,7 @@ user has download access
 = 1.13 =
 
 * Fixed bug where video group accessnot being granted unless there were multiple purchase options
+
+= 1.14 =
+
+* Made group product be virtual type and also now allow letting title not be updated just like description
