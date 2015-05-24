@@ -1113,7 +1113,7 @@ function update_videos()
 					                        $time_limit = (string)$xml->result[0]->{'video'.$index}[0]->{'option'.$option_index}[0]->time_limit;
 					                        $rate_limit = (string)$xml->result[0]->{'video'.$index}[0]->{'option'.$option_index}[0]->rate_limit;
 						                $download_limit = (string)$xml->result[0]->{'video'.$index}[0]->{'option'.$option_index}[0]->download_limit;
-								$option_name = $time_limit.' access';
+								$option_name = __($time_limit.' access','my_text_domain');
 								/*if($bandwidth_cap!="Unlimited")
 									$option_name = $option_name.' '.$bandwidth_cap.' Data Cap';
 								if($rate_limit!="No limit")
